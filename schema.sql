@@ -91,6 +91,44 @@ CREATE TABLE IF NOT EXISTS sms_logs (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- LMS & LEARNING SYSTEM
+CREATE TABLE IF NOT EXISTS modules (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  order_index INTEGER NOT NULL,
+  is_locked BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS lessons (
+  id SERIAL PRIMARY KEY,
+  module_id INTEGER REFERENCES modules(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  content TEXT,
+  video_url TEXT,
+  order_index INTEGER NOT NULL,
+  duration_minutes INTEGER,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS student_progress (
+  id SERIAL PRIMARY KEY,
+  registration_id INTEGER REFERENCES registrations(id) ON DELETE CASCADE,
+  lesson_id INTEGER REFERENCES lessons(id) ON DELETE CASCADE,
+  completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(registration_id, lesson_id)
+);
+
+CREATE TABLE IF NOT EXISTS student_notifications (
+  id SERIAL PRIMARY KEY,
+  registration_id INTEGER REFERENCES registrations(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- INITIAL SEED FOR TIMETABLE
 -- INSERT INTO timetable (day, time, topic) VALUES
 -- ('Monday', '1:00 PM - 3:00 PM', 'HTML5 & Semantic Web'),

@@ -25,7 +25,7 @@ export async function GET(req: Request) {
       sql += ` AND type = $${params.length}`;
     }
 
-    if (category && category !== 'all') {
+    if (category && category !== 'all' && category !== 'undefined') {
       params.push(category);
       sql += ` AND category = $${params.length}`;
     }
@@ -60,6 +60,22 @@ export async function GET(req: Request) {
     sql += ` OFFSET $${params.length}`;
 
     const res = await query(sql, params);
+
+    // Seed initial alerts if empty
+    if (total === 0 && page === 1 && !search) {
+      await query(`
+        INSERT INTO alerts (type, title, message, category, source)
+        VALUES
+        ('info', 'System Operational', 'The CodeStart infrastructure is now online and monitoring for traffic.', 'system', 'system'),
+        ('success', 'Database Initialized', 'LMS and alert nodes have been synchronized with the main database.', 'system', 'system')
+      `);
+      // Re-fetch
+      const res2 = await query(sql, params);
+      return NextResponse.json({
+        alerts: res2.rows,
+        pagination: { total: 2, page: 1, limit, totalPages: 1 }
+      });
+    }
 
     return NextResponse.json({
       alerts: res.rows,

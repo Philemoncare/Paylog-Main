@@ -11,6 +11,12 @@ export const REGISTRATION_DEADLINE = new Date('2026-06-19T23:59:59Z');
 
 export const TRAINING_MODE = "Hybrid (Online & Physical)";
 
+export const COHORT_SEAT_TARGET = 25;
+
+export const REGISTRATION_FEE_GHS = 450;
+
+export const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/F6F93vrKMyNK2GVGl8QXfB";
+
 /**
  * Utility to check if registration is currently open
  */

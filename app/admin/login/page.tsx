@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
         notify.success("Security Code Sent", "Please verify your identity with the key sent to your email.");
         router.push(`/admin/verify?email=${encodeURIComponent(email)}`);
       } else {
-        notify.success("Access Granted", "Welcome back to the CodeStart Command Center.");
+        notify.success("Access Granted", "Welcome back to the CodeStart Administration Portal.");
         router.push("/admin/dashboard");
       }
     } catch (error: any) {

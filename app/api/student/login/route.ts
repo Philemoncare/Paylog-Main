@@ -48,14 +48,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'The password you entered is incorrect.' }, { status: 401 });
     }
 
-    // 2. Enforce Strict Admin Approval
-    if (student.status === 'pending') {
-      return NextResponse.json({
-        error: 'Your application is still pending approval.',
-        status: 'pending'
-      }, { status: 403 });
-    }
-
+    // 2. Enforce Strict Admin Approval (ALLOW PENDING for status check)
     if (student.status === 'rejected') {
       return NextResponse.json({
         error: 'Your application was not approved. Please contact support.',
@@ -63,7 +56,9 @@ export async function POST(req: Request) {
       }, { status: 403 });
     }
 
-    if (student.status !== 'approved') {
+    // We allow 'pending' and 'approved' to login.
+    // Dashboard will handle the 'pending' UI.
+    if (student.status !== 'approved' && student.status !== 'pending') {
         return NextResponse.json({ error: 'Account is not in an active state.' }, { status: 403 });
     }
 
@@ -82,6 +77,15 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: '/'
+    });
+
+    // Set a non-httpOnly cookie for the UI to know we are logged in
+    response.cookies.set('student_logged_in', 'true', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
       path: '/'
     });
 

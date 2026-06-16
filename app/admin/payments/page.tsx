@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
 
 import { Skeleton } from "@/components/ui/Skeleton";
+import { REGISTRATION_FEE_GHS } from "@/lib/constants";
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -77,7 +78,9 @@ export default function PaymentsPage() {
     p.transaction_id?.toLowerCase().includes(filter.toLowerCase())
   );
 
-  const approvedTotal = payments.filter(p => p.payment_status === 'approved').length * 450;
+  const approvedTotal = payments
+    .filter(p => p.payment_status === 'approved')
+    .reduce((sum, p) => sum + (p.amount || REGISTRATION_FEE_GHS), 0);
 
   const openScreenshot = (url: string) => {
     if (url.startsWith('data:')) {

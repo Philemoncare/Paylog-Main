@@ -90,5 +90,136 @@ export const adminService = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, value }),
     });
+  },
+
+  // LMS METHODS
+  async getCourses() {
+    return apiFetch('/api/admin/lms/courses');
+  },
+
+  async createCourse(data: any) {
+    return apiFetch('/api/admin/lms/courses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateCourse(data: any) {
+    return apiFetch('/api/admin/lms/courses', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteCourse(id: number) {
+    return apiFetch(`/api/admin/lms/courses?id=${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async getModules(courseId: number) {
+    return apiFetch(`/api/admin/lms/modules?courseId=${courseId}`);
+  },
+
+  async createModule(data: any) {
+    return apiFetch('/api/admin/lms/modules', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateModule(data: any) {
+    return apiFetch('/api/admin/lms/modules', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteModule(id: number) {
+    return apiFetch(`/api/admin/lms/modules?id=${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async getLessons(moduleId: number) {
+    return apiFetch(`/api/admin/lms/lessons?moduleId=${moduleId}`);
+  },
+
+  async createLesson(data: any) {
+    return apiFetch('/api/admin/lms/lessons', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateLesson(data: any) {
+    return apiFetch('/api/admin/lms/lessons', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteLesson(id: number) {
+    return apiFetch(`/api/admin/lms/lessons?id=${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async getAssignments(lessonId: number) {
+    return apiFetch(`/api/admin/lms/assignments?lessonId=${lessonId}`);
+  },
+
+  async createAssignment(data: any) {
+    return apiFetch('/api/admin/lms/assignments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateAssignment(data: any) {
+    return apiFetch('/api/admin/lms/assignments', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteAssignment(id: number) {
+    return apiFetch(`/api/admin/lms/assignments?id=${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async getSubmissions(filters: { status?: string, type?: string } = {}) {
+    const params = new URLSearchParams(filters as any);
+    return apiFetch(`/api/admin/submissions?${params.toString()}`);
+  },
+
+  async updateSubmission(data: { id: number, status: string, score?: number, feedback?: string }) {
+    return apiFetch('/api/admin/submissions', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getAnalytics() {
+    return apiFetch('/api/admin/analytics');
+  },
+
+  async uploadFile(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiFetch('/api/admin/upload', {
+      method: 'POST',
+      body: formData,
+    });
   }
 };

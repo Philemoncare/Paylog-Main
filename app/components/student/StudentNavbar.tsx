@@ -22,12 +22,6 @@ export const StudentNavbar = () => {
     try {
       await studentService.logout();
       router.push("/");
-      toast.success(
-        <div className="flex flex-col gap-1">
-          <span className="font-black text-white text-sm tracking-tight">Logout Successful</span>
-          <span className="text-slate-400 text-xs font-medium">See you again soon! 👋</span>
-        </div>
-      );
     } catch (e) {
       router.push("/");
     }
@@ -35,71 +29,75 @@ export const StudentNavbar = () => {
 
   const menuItems = [
     { label: "Dashboard", href: "/student/dashboard", icon: Home },
-    { label: "Learning Space", href: "/student/learning-space", icon: BookOpen },
-    { label: "Curriculum", href: "/student/curriculum", icon: Map },
+    { label: "My Learning", href: "/student/learning-space", icon: BookOpen },
+    { label: "Assignments", href: "/student/assignments", icon: FileText },
     { label: "Projects", href: "/student/projects", icon: FolderKanban },
-    { label: "Resources", href: "/student/resources", icon: FileText },
+    { label: "Resources", href: "/student/resources", icon: Map },
     { label: "Notifications", href: "/student/notifications", icon: Bell },
-    { label: "Account Settings", href: "/student/profile", icon: Settings },
+    { label: "Profile", href: "/student/profile", icon: Settings },
   ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[110] bg-white border-b border-slate-100 shadow-sm">
-      <nav className="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
-        <div className="flex items-center gap-4 md:gap-10">
-          <Link href="/student/dashboard" className="flex items-center gap-2 group">
-            <div className="relative w-8 h-8 md:w-9 md:h-9 transition-transform group-hover:scale-105">
+    <div className="fixed top-0 left-0 right-0 z-[110] bg-white border-b border-slate-200 shadow-sm">
+      <nav className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-10">
+          <Link href="/student/dashboard" className="flex items-center gap-2.5 group">
+            <div className="relative w-8 h-8 transition-all group-hover:opacity-80 active:scale-95">
               <Image src="/images/faicom.png" alt="Logo" fill className="object-contain" priority />
             </div>
-            <span className="font-black text-lg md:text-xl tracking-tighter text-slate-900 uppercase">CodeStart</span>
+            <span className="font-bold text-base tracking-tighter text-[#0F172A] uppercase">CodeStart</span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-6">
             <NavLink href="/student/dashboard" active={pathname === "/student/dashboard"}>Dashboard</NavLink>
-            <NavLink href="/student/learning-space" active={pathname === "/student/learning-space"}>Learn</NavLink>
+            <NavLink href="/student/learning-space" active={pathname === "/student/learning-space"}>My Learning</NavLink>
+            <NavLink href="/student/assignments" active={pathname === "/student/assignments"}>Assignments</NavLink>
+            <NavLink href="/student/projects" active={pathname === "/student/projects"}>Projects</NavLink>
+            <NavLink href="/student/resources" active={pathname === "/student/resources"}>Resources</NavLink>
+            <NavLink href="/student/notifications" active={pathname === "/student/notifications"}>Notifications</NavLink>
             <NavLink href="/student/profile" active={pathname === "/student/profile"}>Profile</NavLink>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
            <button
              onClick={handleLogout}
-             className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-slate-50 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-all border border-slate-100"
+             className="hidden sm:flex items-center gap-2 px-4 py-2 text-slate-500 rounded-xl text-[11px] font-bold hover:bg-slate-50 hover:text-[#0F172A] transition-all border border-transparent hover:border-slate-200"
            >
-             <LogOut size={14} /> Logout
+             <LogOut size={14} /> Exit Portal
            </button>
            <button
              onClick={() => setIsOpen(true)}
-             className="p-2.5 bg-slate-900 text-white rounded-xl lg:hidden shadow-lg active:scale-95 transition-all"
+             className="p-2 bg-[#0F172A] text-white rounded-xl lg:hidden active:scale-95 transition-all shadow-md"
            >
-             <Menu size={20} />
+             <Menu size={18} />
            </button>
         </div>
       </nav>
 
-      {/* Sidebar Navigation */}
+      {/* 4. PREMIUM DRAWER */}
       <div className={cn(
         "fixed inset-0 z-[150] lg:hidden transition-all duration-500",
         isOpen ? "visible" : "invisible"
       )}>
         <div
           className={cn(
-            "absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-500",
+            "absolute inset-0 bg-[#0F172A]/40 backdrop-blur-sm transition-opacity duration-500",
             isOpen ? "opacity-100" : "opacity-0"
           )}
           onClick={() => setIsOpen(false)}
         />
         <aside className={cn(
-          "absolute right-0 top-0 bottom-0 w-full max-w-[320px] bg-white shadow-2xl transition-transform duration-500 ease-out flex flex-col",
+          "absolute right-0 top-0 bottom-0 w-full max-w-[300px] bg-white border-l border-slate-100 shadow-2xl transition-transform duration-500 ease-out flex flex-col",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}>
-           <div className="p-6 h-20 flex items-center justify-between border-b border-slate-50">
-              <span className="font-black text-xl tracking-tighter uppercase text-slate-900">Portal Menu</span>
+           <div className="p-6 h-16 flex items-center justify-between border-b border-slate-50 bg-slate-50/30">
+              <span className="font-bold text-[10px] uppercase tracking-[0.2em] text-slate-400">Portal Navigation</span>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 bg-slate-50 text-slate-400 rounded-xl hover:text-slate-900 transition-colors"
+                className="p-2 bg-white border border-slate-200 text-slate-400 rounded-xl hover:text-[#0F172A] transition-colors"
               >
-                 <X size={20} />
+                 <X size={18} />
               </button>
            </div>
            <div className="flex-1 overflow-y-auto p-4 space-y-1">
@@ -108,31 +106,23 @@ export const StudentNavbar = () => {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center justify-between p-4 rounded-2xl transition-all group",
+                    "flex items-center gap-4 p-3 rounded-xl transition-all border",
                     pathname === item.href
-                      ? "bg-blue-600 text-white shadow-xl shadow-blue-600/20"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                      ? "bg-slate-50 border-slate-200 text-[#0F172A]"
+                      : "bg-white border-transparent text-slate-500 hover:bg-slate-50 hover:text-[#0F172A]"
                   )}
                 >
-                   <div className="flex items-center gap-4">
-                      <div className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
-                        pathname === item.href ? "bg-white/20" : "bg-slate-50 group-hover:bg-white"
-                      )}>
-                         <item.icon size={20} />
-                      </div>
-                      <span className="font-bold text-sm uppercase tracking-tight">{item.label}</span>
-                   </div>
-                   <ChevronRight size={16} className={cn("opacity-40", pathname === item.href && "opacity-100")} />
+                   <item.icon size={18} className={cn(pathname === item.href ? "text-[#2563EB]" : "text-slate-400")} />
+                   <span className="font-bold text-xs uppercase tracking-tight">{item.label}</span>
                 </Link>
               ))}
            </div>
-           <div className="p-6 border-t border-slate-50">
+           <div className="p-6 border-t border-slate-100 bg-slate-50/20">
               <button
                 onClick={handleLogout}
-                className="flex items-center justify-center gap-3 w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-rose-600 hover:text-white transition-all active:scale-95 shadow-sm"
+                className="flex items-center justify-center gap-2 w-full py-3.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all active:scale-95"
               >
-                 <LogOut size={16} /> Sign Out of Portal
+                 <LogOut size={16} /> Sign Out
               </button>
            </div>
         </aside>
@@ -146,13 +136,13 @@ function NavLink({ href, children, active = false }: any) {
     <Link
       href={href}
       className={cn(
-        "text-[10px] font-black uppercase tracking-widest transition-all relative py-2",
-        active ? "text-blue-600" : "text-slate-400 hover:text-slate-600"
+        "text-xs font-bold transition-all relative py-1 uppercase tracking-tight",
+        active ? "text-[#0F172A]" : "text-slate-400 hover:text-[#0F172A]"
       )}
     >
       {children}
       {active && (
-        <span className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-full" />
+        <span className="absolute -bottom-1.5 left-0 right-0 h-[2px] bg-[#2563EB] rounded-full" />
       )}
     </Link>
   );

@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import "./styles/globals.css";
+import "@/styles/globals.css";
 import { Toaster } from "sonner";
 import { ScrollManagement } from "@/components/ui/ScrollManagement";
 import { CookieConsent } from "@/components/ui/CookieConsent";
@@ -16,12 +16,19 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "CodeStart | Practical Software Engineering Training",
-  description: "Join a practical engineering-focused learning environment designed to help developers grow through projects, mentorship, and consistent technical practice.",
+  description: "Elite engineering-focused learning environment designed for real-world technical mastery.",
   icons: {
     icon: "/images/faicom.png",
     shortcut: "/images/faicom.png",
     apple: "/images/faicom.png",
   },
+  metadataBase: new URL('https://codestart.sh'),
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0F172A',
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -31,16 +38,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} font-sans bg-white text-slate-900 antialiased overflow-x-hidden min-h-screen`}>
+      <body className={`${inter.variable} font-sans bg-white text-slate-900 antialiased min-h-screen selection:bg-blue-100 selection:text-blue-900`}>
         <Suspense fallback={null}>
           <Analytics />
         </Suspense>
+
         <ScrollManagement />
-        <main>
-          {children}
-        </main>
+
+        {children}
+
         <BackToTop />
         <CookieConsent />
+
         <Toaster
           position="bottom-right"
           expand={false}
@@ -51,12 +60,14 @@ export default function RootLayout({
           theme="light"
           toastOptions={{
             style: {
-              borderRadius: '1.25rem',
+              borderRadius: '1rem',
               padding: '12px 16px',
               border: '1px solid #f1f5f9',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+              fontSize: '13px',
+              fontWeight: 600,
             },
-            className: 'font-sans font-medium',
+            className: 'font-sans',
           }}
         />
       </body>

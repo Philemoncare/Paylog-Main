@@ -1,76 +1,60 @@
+/**
+ * ENTERPRISE-GRADE API FETCH UTILITY
+ * Standardizes all outbound requests with timeout protection,
+ * automatic JSON parsing, and graceful error normalization.
+ */
 export async function apiFetch(url: string, options: RequestInit = {}) {
-  // Disable caching for all API calls to ensure data freshness
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
   const fetchOptions: RequestInit = {
     ...options,
-    cache: 'no-store',
+    cache: 'no-store', // Prevent stale data glitches in dashboards
     signal: controller.signal,
     headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
       ...options.headers,
     }
   };
 
-  let response: Response;
   try {
-    response = await fetch(url, fetchOptions);
-    clearTimeout(id);
-  } catch (networkError: any) {
-    clearTimeout(id);
-    console.error("Network error during fetch:", url, networkError);
-    if (networkError.name === 'AbortError') {
-      throw new Error("Request timed out. The server or database is taking too long to respond.");
+    const response = await fetch(url, fetchOptions);
+    clearTimeout(timeoutId);
+
+    const contentType = response.headers.get("content-type") || "";
+
+    // Safety check for non-JSON responses (e.g. server crashes returning HTML)
+    if (!contentType.includes("application/json")) {
+       const text = await response.text();
+       if (text.startsWith("<!DOCTYPE") || text.startsWith("<html")) {
+          throw new Error("Server error (HTML_FAULT). The API node might be restarting.");
+       }
+       return text;
     }
-    throw new Error("Connection failed. Please check your internet and try again.");
-  }
 
-  const contentType = response.headers.get("content-type") || "";
-  const isJson = contentType.includes("application/json");
-
-  // We read as text first to avoid the "Unexpected token <" crash and allow better debugging
-  const rawText = await response.text();
-
-  if (isJson) {
-    let data;
-    try {
-      if (!rawText || rawText.trim() === "") {
-        throw new Error("Empty response from server");
-      }
-      data = JSON.parse(rawText);
-    } catch (e) {
-      console.error("JSON Parse Error at " + url, { status: response.status, preview: rawText.substring(0, 200) });
-      if (rawText.trim().startsWith("<!DOCTYPE") || rawText.trim().startsWith("<html")) {
-        throw new Error("The server returned an HTML error page. This usually means a server-side crash.");
-      }
-      throw new Error(`Invalid response format from server (${response.status})`);
-    }
+    const data = await response.json();
 
     if (!response.ok) {
-      const msg = data.error || data.message || `Error ${response.status}: Request failed.`;
-      const err = new Error(msg);
-      if (data.details) {
-        (err as any).details = data.details;
-      }
-      throw err;
+      const error = new Error(data.error || data.message || `API Failure (${response.status})`);
+      (error as any).status = response.status;
+      (error as any).details = data.details;
+      throw error;
     }
+
     return data;
-  } else {
-    // Non-JSON response handling
-    console.error("Unexpected Non-JSON Response at " + url, {
-      status: response.status,
-      contentType,
-      preview: rawText.substring(0, 200)
-    });
+  } catch (err: any) {
+    clearTimeout(timeoutId);
 
-    if (response.status === 404) {
-      throw new Error(`The API endpoint "${url}" was not found (404).`);
+    if (err.name === 'AbortError') {
+      throw new Error("Synchronization Timeout: The platform node is responding slowly.");
     }
 
-    if (rawText.trim().startsWith("<!DOCTYPE")) {
-      throw new Error("The server is currently unavailable or returned a technical error page.");
+    // Log API faults in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(`[API_FAULT] ${url}:`, err.message);
     }
 
-    throw new Error(rawText || `Server returned an error (${response.status}).`);
+    throw err;
   }
 }

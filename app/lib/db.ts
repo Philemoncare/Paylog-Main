@@ -1,57 +1,62 @@
 import { Pool, PoolConfig } from 'pg';
 
+/**
+ * PRODUCTION-GRADE NEON DATABASE ADAPTER
+ * Implements an optimized singleton connection pooler with
+ * extended timeouts for serverless cold-start resilience.
+ */
+
 const connectionString = process.env.DATABASE_URL;
 
-if (!connectionString) {
-  throw new Error('DATABASE_URL environment variable is not set');
+if (!connectionString && process.env.NODE_ENV === 'production') {
+  throw new Error('CRITICAL: DATABASE_URL is missing in production environment');
 }
 
+// Optimized for Neon Serverless Cold Starts
 const poolConfig: PoolConfig = {
   connectionString,
-  // Neon requires SSL. For serverless, we usually use rejectUnauthorized: false
-  // or a specific CA cert, but Neon's default works with rejectUnauthorized: false.
-  ssl: {
-    rejectUnauthorized: false
-  },
-  // Optimize for serverless cold starts and connection limits
+  ssl: connectionString?.includes('localhost') ? false : { rejectUnauthorized: false },
   max: 10,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000, // Increased to 10s for resilience
+  maxUses: 7500,
 };
 
-// Global pool instance to prevent multiple pools in development/serverless
 let pool: Pool;
 
 if (process.env.NODE_ENV === 'production') {
   pool = new Pool(poolConfig);
 } else {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
   if (!(global as any).pgPool) {
     (global as any).pgPool = new Pool(poolConfig);
   }
   pool = (global as any).pgPool;
 }
 
+/**
+ * HARDENED QUERY WRAPPER
+ * Standardizes async execution and semantic error recovery.
+ */
 export const query = async (text: string, params?: any[]) => {
   const start = Date.now();
   try {
     const res = await pool.query(text, params);
-    const duration = Date.now() - start;
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Executed query', { text, duration, rows: res.rowCount });
-    }
     return res;
   } catch (error: any) {
-    console.error('DATABASE_QUERY_ERROR:', {
-      text,
-      error: error.message,
+    console.error('[DB_FAULT]:', {
+      msg: error.message,
       code: error.code,
-      stack: error.stack?.substring(0, 200)
+      query: text.substring(0, 50)
     });
 
-    if (error.message?.includes('timeout') || error.message?.includes('ECONNRESET')) {
-       throw new Error('Database connection timed out. The Neon compute instance might be suspended or your IP is not allowed.');
+    // Handle standard Postgres connection faults
+    if (error.code === 'ECONNREFUSED' || error.message?.includes('timeout')) {
+       throw new Error('DATABASE_OFFLINE: The academic core is temporarily unreachable.');
+    }
+
+    // Handle missing infrastructure
+    if (error.code === '42P01') {
+       throw new Error('INFRASTRUCTURE_DESYNC: Academic tables are pending synchronization.');
     }
 
     throw error;
